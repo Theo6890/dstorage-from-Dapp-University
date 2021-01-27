@@ -1,73 +1,53 @@
 //import DStorage from '../abis/DStorage.json'
-import React, { Component } from "react";
-import Navbar from "./Navbar";
-import Main from "./Main";
-import Web3 from "web3";
+import { Component } from "react";
 import "./App.css";
 
-//Declare IPFS
+const ipfsClient = require("ipfs-http-client");
+const ipfs = ipfsClient({
+  host: "ipfs.infura.io",
+  port: 5001,
+  protocol: "https",
+}); // leaving out the arguments will default to these values
 
 class App extends Component {
-  async componentWillMount() {
-    await this.loadWeb3();
-    await this.loadBlockchainData();
-  }
+  // Get file from user: convert files into a Buffer
+  captureFile = (event) => {
+    event.preventDefault();
 
-  async loadWeb3() {
-    //Setting up Web3
-  }
+    const file = event.target.files[0];
+    const reader = new window.FileReader();
 
-  async loadBlockchainData() {
-    //Declare Web3
-    //Load account
-    //Network ID
-    //IF got connection, get data from contracts
-    //Assign contract
-    //Get files amount
-    //Load files&sort by the newest
-    //Else
-    //alert Error
-  }
-
-  // Get file from user
-  captureFile = (event) => {};
-
-  //Upload File
-  uploadFile = (description) => {
-    //Add file to the IPFS
-    //Check If error
-    //Return error
-    //Set state to loading
-    //Assign value for the file without extension
-    //Call smart contract uploadFile function
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      this.setState({
+        buffer: Buffer(reader.result),
+        type: file.type,
+        name: file.name,
+      });
+      console.log("buffer", this.state.buffer);
+    };
   };
 
-  //Set states
-  constructor(props) {
-    super(props);
-    this.state = {};
+  uploadFile = (description) => {
+    console.log("Submitting file to IPFS...");
 
-    //Bind functions
-  }
+    // Add file to the IPFS
+    ipfs.add(this.state.buffer, (error, result) => {
+      console.log("IPFS result", result.size);
+      if (error) {
+        console.error(error);
+        return;
+      }
 
-  render() {
-    return (
-      <div>
-        <Navbar account={this.state.account} />
-        {this.state.loading ? (
-          <div id="loader" className="text-center mt-5">
-            <p>Loading...</p>
-          </div>
-        ) : (
-          <Main
-            files={this.state.files}
-            captureFile={this.captureFile}
-            uploadFile={this.uploadFile}
-          />
-        )}
-      </div>
-    );
-  }
+      this.setState({ loading: true });
+      // Assign value for the file without extension
+      if (this.state.type === "") {
+        this.setState({ type: "none" });
+      }
+
+      // Send DStorage.uploadFile()
+    });
+  };
 }
 
 export default App;
