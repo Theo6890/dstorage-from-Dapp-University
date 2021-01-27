@@ -1,8 +1,28 @@
 const DStorage = artifacts.require("./DStorage.sol");
+const StringUtils = artifacts.require("./StringUtils.sol");
 
 require("chai").use(require("chai-as-promised")).should();
 
-contract("DStorage", ([deployer, uploader]) => {
+contract("StringUtils", ([deployer, uploader]) => {
+  let stringUtils;
+
+  before(async () => {
+    stringUtils = await StringUtils.deployed();
+  });
+
+  describe("deployment", async () => {
+    it("verifies getCharsAt return", async () => {
+      const chars = await stringUtils.getCharsAt(
+        "QmXnnyufdzAWL5CqZ2RnSNgPbvCc1ALT73s6epPrRnZ1Xy",
+        0,
+        1
+      );
+      assert.equal(chars, "Qm");
+    });
+  });
+});
+
+contract.skip("DStorage", ([deployer, uploader]) => {
   let dstorage;
 
   before(async () => {
@@ -23,7 +43,7 @@ contract("DStorage", ([deployer, uploader]) => {
       assert.equal(name, "DStorage");
     });
 
-    it("validates hash", async () => {
+    it("does not fail on given hash", async () => {
       await dstorage.uploadFile(
         "QmXnnyufdzAWL5CqZ2RnSNgPbvCc1ALT73s6epPrRnZ1Xy",
         1021,
