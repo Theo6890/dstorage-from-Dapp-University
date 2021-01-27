@@ -33,19 +33,8 @@ class App extends Component {
 
     // Add file to the IPFS
     ipfs.add(this.state.buffer, (error, result) => {
-      console.log("IPFS result", result.size);
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      this.setState({ loading: true });
-      // Assign value for the file without extension
-      if (this.state.type === "") {
-        this.setState({ type: "none" });
-      }
-
-      // Send DStorage.uploadFile()
+      result.hash, // hash to retrieve uploaded file
+        result.size; // size of uploaded file
     });
   };
 }
